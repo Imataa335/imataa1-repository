@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senanga College of Nursing and Midwifery - Exam Attempts Management</title>
+    <style>
+        body {
+            background-image:url(libimage.jpg);
+            height:100vh;
+            background-size:cover;
+            background-position:center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .username {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+        .nav button.active {
+            background-color: #2980b9;
+        }
+        form {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        @media (max-width: 600px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            th {
+                display: none;
+            }
+            tr {
+                margin-bottom: 15px;
+            }
+            td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+            }
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                padding-right: 10px;
+                text-align: left;
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Senanga College of Nursing and Midwifery - Exam Attempts Management System</h1>
+
+    <div class="username">@imataa</div>
+
+    <div class="nav">
+        <button id="entryBtn" class="active">Entry</button>
+        <button id="studentListBtn">Student List</button>
+    </div>
+
+    <form id="examForm">
+        <input type="text" id="studentName" placeholder="Student Name" required>
+        <input type="text" id="indexNumber" placeholder="Index Number" required>
+        <select id="program" required>
+            <option value="" disabled selected>Select Program</option>
+            <option value="Registered Nursing">Registered Nursing</option>
+            <option value="Registered Public Health">Registered Public Health</option>
+            <option value="Registered Midwifery">Registered Midwifery</option>
+            <option value="HNP">HNP</option>
+        </select>
+        <input type="text" id="examName" placeholder="Exam Name" required>
+        <input type="date" id="examDate" required>
+        <input type="number" id="score" placeholder="Score" min="0" max="100" required>
+        <input type="number" id="awards" placeholder="Number of Awards Received" min="0" required>
+        <input type="text" id="awardName" placeholder="Name of Award" required>
+        <button type="submit">Add Exam Attempt</button>
+    </form>
+
+    <table id="examTable">
+        <thead>
+            <tr>
+                <th>Serial No.</th>
+                <th>Student Name</th>
+                <th>Index Number</th>
+                <th>Program</th>
+                <th>Exam Name</th>
+                <th>Exam Date</th>
+                <th>Score</th>
+                <th>Awards</th>
+                <th>Name of Award</th>
+                <th>Exam Attempts</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Exam attempts will be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        const examAttempts = [];
+        const studentAttemptsCount = {};
+
+        function showEntryForm() {
+            document.getElementById('examForm').style.display = 'block';
+            document.getElementById('examTable').style.display = 'none';
+            document.getElementById('entryBtn').classList.add('active');
+            document.getElementById('studentListBtn').classList.remove('active');
+        }
+
+        function showStudentList() {
+            document.getElementById('examForm').style.display = 'none';
+            document.getElementById('examTable').style.display = 'table';
+            document.getElementById('entryBtn').classList.remove('active');
+            document.getElementById('studentListBtn').classList.add('active');
+            updateExamTable(); // Refresh the table to make sure it's up to date
+        }
+
+        document.getElementById('entryBtn').addEventListener('click', showEntryForm);
+        document.getElementById('studentListBtn').addEventListener('click', showStudentList);
+
+        document.getElementById('examForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const studentName = document.getElementById('studentName').value;
+            const indexNumber = document.getElementById('indexNumber').value;
+            const program = document.getElementById('program').value;
+            const examName = document.getElementById('examName').value;
+            const examDate = document.getElementById('examDate').value;
+            const score = document.getElementById('score').value;
+            const awards = document.getElementById('awards').value;
+            const awardName = document.getElementById('awardName').value;
+
+            const examAttempt = {
+                studentName,
+                indexNumber,
+                program,
+                examName,
+                examDate,
+                score,
+                awards,
+                awardName
+            };
+
+            examAttempts.push(examAttempt);
+
+            // Update attempt count for the student
+            if (!studentAttemptsCount[studentName]) {
+                studentAttemptsCount[studentName] = 0;
+            }
+            studentAttemptsCount[studentName]++;
+
+            updateExamTable();
+            document.getElementById('examForm').reset();
+        });
+
+        function updateExamTable() {
+            const tableBody = document.getElementById('examTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+
+            examAttempts.forEach((attempt, index) => {
+                const attemptCount = studentAttemptsCount[attempt.studentName];
+                const newRow = tableBody.insertRow();
+                newRow.innerHTML = `
+                    <td data-label="Serial No.">${index + 1}</td>
+                    <td data-label="Student Name">${attempt.studentName}</td>
+                    <td data-label="Index Number">${attempt.indexNumber}</td>
+                    <td data-label="Program">${attempt.program}</td>
+                    <td data-label="Exam Name">${attempt.examName}</td>
+                    <td data-label="Exam Date">${attempt.examDate}</td>
+                    <td data-label="Score">${attempt.score}</td>
+                    <td data-label="Awards">${attempt.awards}</td>
+                    <td data-label="Name of Award">${attempt.awardName}</td>
+                    <td data-label="Exam Attempts">${attemptCount}</td>
+                    <td data-label="Actions">
+                        <button onclick="deleteAttempt(${index})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteAttempt(index) {
+            const studentName = examAttempts[index].studentName;
+
+            // Decrement the student attempt count
+            studentAttemptsCount[studentName]--;
+
+            // If count goes to zero, remove the student from the count object
+            if (studentAttemptsCount[studentName] <= 0) {
+                delete studentAttemptsCount[studentName];
+            }
+
+            examAttempts.splice(index, 1);
+            updateExamTable();
+        }
+
+        // Show the entry form by default on page load
+        showEntryForm();
+    </script>
+</body>
+</html>
